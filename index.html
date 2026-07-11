@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fedimoji — Catalogue Mastodon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood-dark: #241B14;
+    --wood: #2B211A;
+    --wood-light: #3A2D22;
+    --paper: #EFE6D8;
+    --paper-2: #E7DCC9;
+    --paper-input: #FBF8F1;
+    --ink: #241B14;
+    --ink-soft: #4A3F33;
+    --red: #A63D2F;
+    --red-hover: #8F342A;
+    --moss: #5C6B4C;
+    --gold: #C9A24B;
+    --brad: #8A6D3B;
+    --radius: 3px;
+
+    --font-display: 'Fraunces', serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body{
+    margin: 0;
+    min-height: 100vh;
+    color: var(--paper);
+    font-family: var(--font-body);
+    background:
+      radial-gradient(ellipse at top, rgba(255,255,255,0.03), transparent 60%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 120px),
+      var(--wood-dark);
+  }
+
+  a{ color: inherit; }
+
+  header{
+    position: relative;
+    padding: 56px 24px 40px;
+    text-align: center;
+    border-bottom: 2px solid var(--wood-light);
+  }
+  header::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(201,162,75,0.06) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .eyebrow{
+    margin-bottom: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  h1{
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 5vw, 48px);
+    letter-spacing: -0.01em;
+  }
+  h1 em{ font-style: italic; color: var(--gold); }
+  .subtitle{
+    max-width: 520px;
+    margin: 0 auto;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #C9BFAE;
+  }
+
+  .panel{
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    margin: -24px auto 0;
+    padding: 0 24px;
+  }
+  .plate{
+    padding: 22px;
+    color: var(--ink);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35), 0 2px 0 rgba(255,255,255,0.08) inset;
+  }
+  .plate-label{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .plate-label::after{
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(36,27,20,0.15);
+  }
+
+  .search-row{ display: flex; gap: 10px; flex-wrap: wrap; }
+
+  input[type="text"]{
+    min-width: 200px;
+    padding: 12px 14px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper-input);
+    border: 1.5px solid rgba(36,27,20,0.25);
+    border-radius: var(--radius);
+  }
+  #instanceInput{ flex: 1; }
+  input[type="text"]:focus{
+    outline: 2px solid var(--red);
+    outline-offset: 1px;
+    border-color: var(--red);
+  }
+
+  button{
+    padding: 12px 20px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    color: #F6ECE3;
+    background: var(--red);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  button:hover{ background: var(--red-hover); }
+  button:active{ transform: scale(0.97); }
+  button:disabled{ cursor: progress; opacity: 0.5; }
+  button:focus-visible,
+  input:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .hint{
+    margin-top: 10px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .hint code{
+    padding: 1px 5px;
+    font-family: var(--font-mono);
+    background: rgba(36,27,20,0.08);
+    border-radius: 2px;
+  }
+
+  .filter-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  select,
+  .filter-search{
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper-input);
+    border: 1.5px solid rgba(36,27,20,0.25);
+    border-radius: var(--radius);
+  }
+  select{ font-family: var(--font-mono); }
+  .filter-search{ flex: 1; min-width: 160px; font-family: var(--font-body); font-size: 13.5px; }
+
+  #status{
+    max-width: 760px;
+    min-height: 20px;
+    margin: 18px auto 0;
+    padding: 0 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: center;
+    color: #C9BFAE;
+  }
+  #status.error{ color: #E39387; }
+
+  .stats-strip{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 28px auto 0;
+    padding: 0 24px;
+  }
+  .stat{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+    color: var(--gold);
+  }
+  .stat b{
+    display: block;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--paper);
+  }
+
+  main{ max-width: 1200px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  #grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 16px;
+  }
+
+  .tag{
+    position: relative;
+    padding: 16px 10px 12px;
+    font-family: inherit;
+    text-align: center;
+    color: var(--ink);
+    background: var(--paper);
+    border: none;
+    border-radius: 2px 2px var(--radius) var(--radius);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.28);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .tag:hover{
+    transform: translateY(-3px) rotate(-0.4deg);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.4);
+  }
+  .tag:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+  .tag::before{
+        content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #E5C783, var(--brad));
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  .tag .emoji-image,
+  .tag .emoji-fallback{
+    display: block;
+    width: 44px;
+    height: 44px;
+    margin: 10px auto 10px;
+    object-fit: contain;
+  }
+  .tag .emoji-fallback{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+
+  .tag .code{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--red);
+    word-break: break-all;
+  }
+  .tag .cat{
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 6px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--moss);
+    border: 1px solid rgba(92,107,76,0.4);
+    border-radius: 2px;
+  }
+  .tag .cat.none{ color: var(--ink-soft); border-color: rgba(74,63,51,0.25); }
+
+  .tag .copied-flag{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #F6ECE3;
+    background: rgba(166,61,47,0.94);
+    border-radius: 2px 2px var(--radius) var(--radius);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .tag.is-copied .copied-flag{ opacity: 1; }
+
+  .empty-state{
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: center;
+    color: #8f8471;
+  }
+
+  footer{
+    padding: 30px 24px 50px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+    color: #7d7362;
+  }
+
+  @media (max-width: 480px){
+  header{ padding: 40px 18px 30px; }
+    #grid{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Catalogue de terrain — spécimens numériques</div>
+  <h1>Fedi<em>moji</em></h1>
+  <p class="subtitle">Renseigne le domaine d'une instance Mastodon pour ouvrir son tiroir et cataloguer chaque emoji personnalisé qu'elle héberge.</p>
+</header>
+
+<div class="panel">
+  <div class="plate">
+    <div class="plate-label">Ouvrir un tiroir</div>
+
+    <div class="search-row">
+      <input type="text" id="instanceInput" placeholder="mastodon.social" autocomplete="off" spellcheck="false">
+      <button id="fetchBtn" type="button">Explorer</button>
+    </div>
+    <p class="hint">Requête envoyée à <code>https://[instance]/api/v1/custom_emojis</code> — endpoint public, aucune authentification requise.</p>
+
+    <div class="filter-row" id="filterRow" hidden>
+      <input type="text" class="filter-search" id="localFilter" placeholder="Filtrer par shortcode…">
+      <select id="categorySelect"></select>
+    </div>
+  </div>
+</div>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<div class="stats-strip" id="statsStrip" hidden>
+  <div class="stat"><b id="statTotal">0</b>emojis</div>
+  <div class="stat"><b id="statCats">0</b>catégories</div>
+  <div class="stat"><b id="statAnim">0</b>animés</div>
+</div>
+
+<main>
+  <div id="grid"></div>
+</main>
+
+<footer>
+  Page statique — s'exécute entièrement dans ton navigateur, aucune donnée n'est stockée ni renvoyée ailleurs.
+</footer>
+
+<script>
+"use strict";
+
+(function () {
+
+  const dom = {
+    instanceInput: document.getElementById('instanceInput'),
+    fetchBtn: document.getElementById('fetchBtn'),
+    status: document.getElementById('status'),
+    grid: document.getElementById('grid'),
+    filterRow: document.getElementById('filterRow'),
+    localFilter: document.getElementById('localFilter'),
+    categorySelect: document.getElementById('categorySelect'),
+    statsStrip: document.getElementById('statsStrip'),
+    statTotal: document.getElementById('statTotal'),
+    statCats: document.getElementById('statCats'),
+    statAnim: document.getElementById('statAnim'),
+  };
+
+  const state = {
+    emojis: [],
+    currentDomain: '',
+  };
+
+  function cleanDomain(rawInput) {
+    return rawInput
+      .trim()
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*$/, '');
+  }
+
+  function escapeHtml(value) {
+    const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return String(value).replace(/[&<>"']/g, (char) => escapeMap[char]);
+  }
+
+  function isAnimated(emoji) {
+    return typeof emoji.url === 'string' && /\.gif($|\?)/i.test(emoji.url);
+  }
+
+  function setStatus(message, isError = false) {
+    dom.status.textContent = message;
+    dom.status.classList.toggle('error', isError);
+  }
+
+  async function fetchCustomEmojis(domain) {
+    const endpoint = `https://${domain}/api/v1/custom_emojis`;
+    const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error('Réponse inattendue (format JSON invalide)');
+    }
+
+    return data
+      .filter((emoji) => emoji && emoji.shortcode)
+      .sort((a, b) => a.shortcode.localeCompare(b.shortcode));
+  }
+
+  function renderCategoryOptions(emojis) {
+    const categories = Array.from(new Set(emojis.map((e) => e.category || '')))
+      .sort((a, b) => a.localeCompare(b));
+
+    const options = ['<option value="">Toutes les catégories</option>']
+      .concat(categories.map((category) => {
+        const label = category ? escapeHtml(category) : 'Sans catégorie';
+        return `<option value="${escapeHtml(category)}">${label}</option>`;
+      }));
+
+    dom.categorySelect.innerHTML = options.join('');
+  }
+
+  function renderStats(emojis) {
+    const categoryCount = new Set(emojis.map((e) => e.category || '__none__')).size;
+    const animatedCount = emojis.filter(isAnimated).length;
+
+    dom.statTotal.textContent = emojis.length;
+    dom.statCats.textContent = categoryCount;
+    dom.statAnim.textContent = animatedCount;
+  }
+
+  function emojiCardMarkup(emoji) {
+    const category = emoji.category || '';
+    const categoryLabel = category ? escapeHtml(category) : 'sans catégorie';
+    const categoryClass = category ? '' : 'none';
+
+    return `
+      <button class="tag" type="button" data-shortcode="${escapeHtml(emoji.shortcode)}">
+        <img class="emoji-image" src="${escapeHtml(emoji.url)}" alt=":${escapeHtml(emoji.shortcode)}:" loading="lazy">
+        <div class="code">:${escapeHtml(emoji.shortcode)}:</div>
+        <div class="cat ${categoryClass}">${categoryLabel}</div>
+        <div class="copied-flag">Copié !</div>
+      </button>
+    `;
+  }
+
+  function renderGrid(emojis) {
+    if (emojis.length === 0) {
+      dom.grid.innerHTML = '<div class="empty-state">Aucun spécimen ne correspond à ce filtre.</div>';
+      return;
+    }
+    dom.grid.innerHTML = emojis.map(emojiCardMarkup).join('');
+  }
+
+  function handleImageError(event) {
+    const img = event.target;
+    if (!img.classList.contains('emoji-image')) return;
+
+    const fallback = document.createElement('div');
+    fallback.className = 'emoji-fallback';
+    fallback.textContent = 'image indisponible';
+    img.replaceWith(fallback);
+  }
+
+  function getFilteredEmojis() {
+    const query = dom.localFilter.value.trim().toLowerCase();
+    const category = dom.categorySelect.value;
+
+    return state.emojis.filter((emoji) => {
+      const matchesQuery = !query || emoji.shortcode.toLowerCase().includes(query);
+      const matchesCategory = !category || (emoji.category || '') === category;
+      return matchesQuery && matchesCategory;
+    });
+  }
+
+  function applyFilters() {
+    renderGrid(getFilteredEmojis());
+  }
+
+  async function handleFetchInstance() {
+    const domain = cleanDomain(dom.instanceInput.value);
+    if (!domain) {
+      setStatus('Indique un nom de domaine, par exemple mastodon.social', true);
+      return;
+    }
+
+    dom.fetchBtn.disabled = true;
+    dom.grid.innerHTML = '';
+    dom.statsStrip.hidden = true;
+    dom.filterRow.hidden = true;
+    setStatus(`Ouverture du tiroir de ${domain} …`);
+
+    try {
+      const emojis = await fetchCustomEmojis(domain);
+      state.emojis = emojis;
+      state.currentDomain = domain;
+
+      if (emojis.length === 0) {
+        setStatus(`Le tiroir de ${domain} est vide — aucun emoji personnalisé trouvé.`);
+        return;
+      }
+
+      setStatus(`${emojis.length} spécimens trouvés sur ${domain}`);
+      renderCategoryOptions(emojis);
+      renderStats(emojis);
+      renderGrid(emojis);
+      dom.filterRow.hidden = false;
+      dom.statsStrip.hidden = false;
+    } catch (error) {
+      console.error('[fedimoji] Échec de la récupération :', error);
+      setStatus(
+        `Impossible de récupérer les emojis de ${domain}. ` +
+        `Vérifie le nom de domaine, ou l'instance bloque peut-être les requêtes cross-origin (CORS).`,
+        true
+      );
+    } finally {
+      dom.fetchBtn.disabled = false;
+    }
+  }
+
+  function handleCardClick(event) {
+    const card = event.target.closest('.tag');
+    if (!card) return;
+
+    const text = `:${card.dataset.shortcode}:`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+
+    card.classList.add('is-copied');
+    setTimeout(() => card.classList.remove('is-copied'), 900);
+  }
+
+  function handleInstanceInputKeydown(event) {
+    if (event.key === 'Enter') handleFetchInstance();
+  }
+
+  function init() {
+    dom.fetchBtn.addEventListener('click', handleFetchInstance);
+    dom.instanceInput.addEventListener('keydown', handleInstanceInputKeydown);
+    dom.localFilter.addEventListener('input', applyFilters);
+    dom.categorySelect.addEventListener('change', applyFilters);
+    dom.grid.addEventListener('click', handleCardClick);
+    dom.grid.addEventListener('error', handleImageError, true);
+
+    dom.instanceInput.value = 'mastodon.social';
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
