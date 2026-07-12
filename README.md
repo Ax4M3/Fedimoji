@@ -27,4 +27,4 @@ Catalogue d'émojis d'instances [Mastodon](https://joinmastodon.org/fr).
 
 ## Licence
 
-Ce projet est distribué sous licence GPL-3.0. Voir le fichier [LICENSE](https://github.com/Ax4M3/Fedimoji/blob/main/LICENSE) pour plus de détails.
+Ce projet est distribué sous licence GPL-3.0. Voir le fichier [LICENSE](https://github.com/Ax4M3/Fedimoji/blob/main/LICENSE) ou [la page dédiée](https://ax4m3.github.io/Fedimoji/pages/license.html) pour plus de détails.
